@@ -18,12 +18,12 @@ GLfloat Theta[NumAxes] = { 0.0, 0.0, 0.0 };
 
 float movX = 3;
 float movY = 0;
+int rotate = 0;
 
 GLuint ModelView, Projection;
 int Index = 0;
 
 void quad(int a, int b, int c, int d) {
-
     
     vec4 u;
     vec4 v;
@@ -142,19 +142,11 @@ void init() {
 void display(void) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    //glGenVertexArrays(1, &vao1);
     const vec3 viewer_pos(movY, 1.2, movX);
-    mat4  model_view = ( Translate(-viewer_pos) * RotateX(Theta[1]) * RotateY(Theta[1]) * RotateZ(Theta[1]));
-    glUniformMatrix4fv(ModelView, 1, GL_TRUE, model_view);
-    glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+    mat4 model_view = ( Translate(-viewer_pos) * RotateX(Theta[1]) * RotateY(Theta[0]) * RotateZ(Theta[1]));
 
-    /*
-    glGenVertexArrays(1, &vao2);
-    const vec3 viewer_pos(movY, 1.0, movX);
-    mat4  model_view = (LookAt(z, a, a) * Translate(-viewer_pos) * RotateX(Theta[1]) * RotateY(Theta[1]) * RotateZ(Theta[1]));
     glUniformMatrix4fv(ModelView, 1, GL_TRUE, model_view);
     glDrawArrays(GL_TRIANGLES, 0, NumVertices);
-    */
 
 
     glutSwapBuffers();
@@ -174,10 +166,22 @@ void mouse(int button, int state, int x, int y) {
 
 void timer(int id) {
 
-    Theta[Axis] += 0.5;
+    if (rotate == 1) {
+        Theta[Axis] -= 0.5;
+        rotate = 0;
+    }
+    else if (rotate == -1) {
+        Theta[Axis] += 0.5;
+        rotate = 0;
+    }
+    else {
+        Theta[Axis] += 0;
+    }
+    
     if (Theta[Axis] > 360.0) {
         Theta[Axis] -= 360.0;
     }
+
     glutPostRedisplay();
     glutTimerFunc(20, timer, 0);
 }
@@ -185,22 +189,27 @@ void timer(int id) {
 void keyboard(unsigned char key, int x, int y) {
 
     switch (key) {
-    case 033:
-    case 'q': case 'Q':
-        exit(EXIT_SUCCESS);
-        break;
-    case 'w': case 'W':
-        movX -= 0.1;
-        break;
-    case 's': case 'S':
-        movX += 0.1;
-        break;
-    case 'a': case 'A':
-        movY -= 0.1;
-        break;
-    case 'd': case 'D':
-        movY += 0.1;
-        break;
+        case 033: case 'q': case 'Q':
+            exit(EXIT_SUCCESS);
+            break;
+        case 'w': case 'W':
+            movX -= 0.1;
+            break;
+        case 's': case 'S':
+            movX += 0.1;
+            break;
+        case 'a': case 'A':
+            movY -= 0.1;
+            break;
+        case 'd': case 'D':
+            movY += 0.1;
+            break;
+        case 'o': case 'O':
+            rotate = 1;
+            break;
+        case 'p': case 'P':
+            rotate = -1;
+            break;
     } 
 }
 
