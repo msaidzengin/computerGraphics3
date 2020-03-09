@@ -2,45 +2,69 @@
 
 typedef Angel::vec4  color4;
 typedef Angel::vec4  point4;
+typedef Angel::vec4  point1;
 
-const int NumVertices = 36;
+const int NumVertices = 300000;
 
 point4 points[NumVertices];
 vec3   normals[NumVertices];
+vec3   colors[NumVertices];
 
-point4 vertices[8] = {
-    point4(-0.5, -0.5,  0.5, 1.0),
-    point4(-0.5,  0.5,  0.5, 1.0),
-    point4(0.5,  0.5,  0.5, 1.0),
-    point4(0.5, -0.5,  0.5, 1.0),
-    point4(-0.5, -0.5, -0.5, 1.0),
-    point4(-0.5,  0.5, -0.5, 1.0),
-    point4(0.5,  0.5, -0.5, 1.0),
-    point4(0.5, -0.5, -0.5, 1.0)
-};
+float groundSize = 0.3;
 
 enum { Xaxis = 0, Yaxis = 1, Zaxis = 2, NumAxes = 3 };
-int      Axis = Xaxis;
-GLfloat  Theta[NumAxes] = { 0.0, 0.0, 0.0 };
+int Axis = Xaxis;
+GLfloat Theta[NumAxes] = { 0.0, 0.0, 0.0 };
 
 float movX = 3;
 float movY = 0;
 
-GLuint  ModelView, Projection;
+GLuint ModelView, Projection;
 int Index = 0;
 
 void quad(int a, int b, int c, int d) {
 
-    vec4 u = vertices[b] - vertices[a];
-    vec4 v = vertices[c] - vertices[b];
-    vec3 normal = normalize(cross(u, v));
+    
+    vec4 u;
+    vec4 v;
+    vec3 normal;
 
-    normals[Index] = normal; points[Index] = vertices[a]; Index++;
-    normals[Index] = normal; points[Index] = vertices[b]; Index++;
-    normals[Index] = normal; points[Index] = vertices[c]; Index++;
-    normals[Index] = normal; points[Index] = vertices[a]; Index++;
-    normals[Index] = normal; points[Index] = vertices[c]; Index++;
-    normals[Index] = normal; points[Index] = vertices[d]; Index++;
+    for (int i = -30; i < 30; i++) {
+        for (int j = -30; j < 30; j++) {
+
+            point4 verticesNew[8] = {
+                point4(-groundSize + i * groundSize * 2, -groundSize ,  groundSize + j * groundSize * 2, 1.0),
+                point4(-groundSize + i * groundSize * 2,  groundSize ,  groundSize + j * groundSize * 2 , 1.0),
+                point4(groundSize + i * groundSize * 2,  groundSize ,  groundSize + j * groundSize * 2 , 1.0),
+                point4(groundSize + i * groundSize * 2, -groundSize ,  groundSize + j * groundSize * 2 , 1.0),
+                point4(-groundSize + i * groundSize * 2, -groundSize , -groundSize + j * groundSize * 2 , 1.0),
+                point4(-groundSize + i * groundSize * 2,  groundSize , -groundSize + j * groundSize * 2 , 1.0),
+                point4(groundSize + i * groundSize * 2,  groundSize , -groundSize + j * groundSize * 2 , 1.0),
+                point4(groundSize + i * groundSize * 2, -groundSize , -groundSize + j * groundSize * 2 , 1.0)
+            };
+
+            u = verticesNew[b] - verticesNew[a];
+            v = verticesNew[c] - verticesNew[b];
+            normal = normalize(cross(u, v));
+
+            if ((abs(i) + abs(j)) % 2 == 0) {
+                normals[Index] = normal; colors[Index] = vec3{ 0.4, 0.4, 0.4 }; points[Index] = verticesNew[a]; Index++;
+                normals[Index] = normal; colors[Index] = vec3{ 0.4, 0.4, 0.4 }; points[Index] = verticesNew[b]; Index++;
+                normals[Index] = normal; colors[Index] = vec3{ 0.4, 0.4, 0.4 }; points[Index] = verticesNew[c]; Index++;
+                normals[Index] = normal; colors[Index] = vec3{ 0.4, 0.4, 0.4 }; points[Index] = verticesNew[a]; Index++;
+                normals[Index] = normal; colors[Index] = vec3{ 0.4, 0.4, 0.4 }; points[Index] = verticesNew[c]; Index++;
+                normals[Index] = normal; colors[Index] = vec3{ 0.4, 0.4, 0.4 }; points[Index] = verticesNew[d]; Index++;
+            }
+            else {
+                normals[Index] = normal; colors[Index] = vec3{ 0.8, 0.8, 0.8 }; points[Index] = verticesNew[a]; Index++;
+                normals[Index] = normal; colors[Index] = vec3{ 0.8, 0.8, 0.8 }; points[Index] = verticesNew[b]; Index++;
+                normals[Index] = normal; colors[Index] = vec3{ 0.8, 0.8, 0.8 }; points[Index] = verticesNew[c]; Index++;
+                normals[Index] = normal; colors[Index] = vec3{ 0.8, 0.8, 0.8 }; points[Index] = verticesNew[a]; Index++;
+                normals[Index] = normal; colors[Index] = vec3{ 0.8, 0.8, 0.8 }; points[Index] = verticesNew[c]; Index++;
+                normals[Index] = normal; colors[Index] = vec3{ 0.8, 0.8, 0.8 }; points[Index] = verticesNew[d]; Index++;
+            }
+        }   
+    }
 }
 
 void colorcube() {
@@ -64,9 +88,10 @@ void init() {
     GLuint buffer;
     glGenBuffers(1, &buffer);
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points) + sizeof(normals), NULL, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(points) + sizeof(normals) + sizeof(colors), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(points), points);
     glBufferSubData(GL_ARRAY_BUFFER, sizeof(points), sizeof(normals), normals);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(points) + sizeof(normals), sizeof(colors), colors);
 
     GLuint program = InitShader("vshader56.glsl", "fshader56.glsl");
     glUseProgram(program);
@@ -79,7 +104,12 @@ void init() {
     glEnableVertexAttribArray(vNormal);
     glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(points)));
 
-    point4 light_position(0.0, 0.0, -1.0, 1.0);
+    GLuint vColor = glGetAttribLocation(program, "vColor");
+    glEnableVertexAttribArray(vColor);
+    glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, BUFFER_OFFSET(sizeof(points) + sizeof(normals)));
+
+
+    point4 light_position(2.0, 3.0, -1.0, 1.0);
     color4 light_ambient(0.2, 0.2, 0.2, 1.0);
     color4 light_diffuse(1.0, 1.0, 1.0, 1.0);
     color4 light_specular(1.0, 1.0, 1.0, 1.0);
@@ -106,19 +136,29 @@ void init() {
 
     glEnable(GL_DEPTH_TEST);
     glShadeModel(GL_SMOOTH);
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClearColor(0.0, 0.0, 0.0, 1.0);
 }
 
 void display(void) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    const vec3 viewer_pos(movY, 1.0, movX);
-    mat4  model_view = (Translate(-viewer_pos) * RotateX(Theta[1]) * RotateY(Theta[1]) * RotateZ(Theta[1]));
+    //glGenVertexArrays(1, &vao1);
+    const vec3 viewer_pos(movY, 1.2, movX);
+    mat4  model_view = ( Translate(-viewer_pos) * RotateX(Theta[1]) * RotateY(Theta[1]) * RotateZ(Theta[1]));
     glUniformMatrix4fv(ModelView, 1, GL_TRUE, model_view);
     glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+
+    /*
+    glGenVertexArrays(1, &vao2);
+    const vec3 viewer_pos(movY, 1.0, movX);
+    mat4  model_view = (LookAt(z, a, a) * Translate(-viewer_pos) * RotateX(Theta[1]) * RotateY(Theta[1]) * RotateZ(Theta[1]));
+    glUniformMatrix4fv(ModelView, 1, GL_TRUE, model_view);
+    glDrawArrays(GL_TRIANGLES, 0, NumVertices);
+    */
+
+
     glutSwapBuffers();
 
-    std::cout << movY << " \n";
 }
 
 void mouse(int button, int state, int x, int y) {
@@ -168,7 +208,7 @@ void reshape(int width, int height) {
 
     glViewport(0, 0, width, height);
     GLfloat aspect = GLfloat(width) / height;
-    mat4 projection = Perspective(60.0, aspect, 0.5, 3.0);
+    mat4 projection = Perspective(60.0, aspect, 0.05, 3000.0);
     glUniformMatrix4fv(Projection, 1, GL_TRUE, projection);
 }
 
