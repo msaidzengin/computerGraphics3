@@ -79,9 +79,9 @@ void ground() {
 
 void triangle(const point4& a, const point4& b, const point4& c) {
 
-    normals[Index] = vec3(a.x, a.y, a.z);  points[Index] = a;  Index++;
-    normals[Index] = vec3(b.x, b.y, b.z);  points[Index] = b;  Index++;
-    normals[Index] = vec3(c.x, c.y, c.z);  points[Index] = c;  Index++;
+    normals[Index] = vec3(a.x, a.y, a.z); colors[Index] = vec3{ 0.4, 1, 0.4 }; points[Index] = a;  Index++;
+    normals[Index] = vec3(b.x, b.y, b.z); colors[Index] = vec3{ 0.4, 1, 0.4 }; points[Index] = b;  Index++;
+    normals[Index] = vec3(c.x, c.y, c.z); colors[Index] = vec3{ 0.4, 1, 0.4 }; points[Index] = c;  Index++;
 }
 
 point4 unit(const point4& p) {
@@ -113,7 +113,7 @@ void divide_triangle(const point4& a, const point4& b, const point4& c, int coun
 
 void tetrahedron(int count) {
     point4 v[4] = {
-    vec4(0.0, 0.0, 1.0, 1.0),
+    vec4(0, 0.0, 1.0, 1.0),
     vec4(0.0, 0.942809, -0.333333, 1.0),
     vec4(-0.816497, -0.471405, -0.333333, 1.0),
     vec4(0.816497, -0.471405, -0.333333, 1.0)
@@ -125,10 +125,11 @@ void tetrahedron(int count) {
     divide_triangle(v[0], v[2], v[3], count);
 }
 
+
 void init() {
 
     ground();
-    //tetrahedron(5);
+    tetrahedron(5);
     
     GLuint vao;
     glGenVertexArrays(1, &vao);
@@ -185,14 +186,17 @@ void init() {
 
     glEnable(GL_DEPTH_TEST);
     glShadeModel(GL_SMOOTH);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(0, 0, 0, 1);
 }
 
 void display(void) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+
     const vec3 viewer_pos(movY, 1.2, movX);
-    mat4 model_view = ( Translate(-viewer_pos) * RotateX(Theta[1]) * RotateY(Theta[0]) * RotateZ(Theta[1]));
+    mat4 model_view = (Translate(-viewer_pos) * RotateX(Theta[1]) * RotateY(Theta[0]) * RotateZ(Theta[1]));
 
     glUniformMatrix4fv(ModelView, 1, GL_TRUE, model_view);
     glDrawArrays(GL_TRIANGLES, 0, NumVertices);
@@ -215,11 +219,11 @@ void mouse(int button, int state, int x, int y) {
 void timer(int id) {
 
     if (rotate == 1) {
-        Theta[Axis] -= 0.5;
+        Theta[Axis] -= 1;
         rotate = 0;
     }
     else if (rotate == -1) {
-        Theta[Axis] += 0.5;
+        Theta[Axis] += 1;
         rotate = 0;
     }
     else {
