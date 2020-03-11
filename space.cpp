@@ -18,6 +18,8 @@ GLfloat Theta[NumAxes] = { 0.0, 0.0, 0.0 };
 
 float movX = 3;
 float movY = 0;
+float rotateX = 0;
+float rotateY = -0.5;
 int rotate = 0;
 
 GLuint ModelView, Projection;
@@ -193,12 +195,16 @@ void display(void) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
+    point4 at(rotateX, rotateY, 0.0, 3);  //ilk parametre sağ-sol, ikinci yukarı aşağı, üçüncü .. , dördüncü uzaklık.
+    point4 eye(0.0, 1.0, 2.0, 2.0);
+    vec4   up(0.0, 1.0, 0.0, 1.0);
 
     const vec3 viewer_pos(movY, 1.2, movX);
-    mat4 model_view = (Translate(-viewer_pos) * RotateX(Theta[1]) * RotateY(Theta[0]) * RotateZ(Theta[1]));
+    mat4 model_view = (LookAt(eye, at, up) * Translate(-viewer_pos) * RotateX(Theta[1]) * RotateY(Theta[0]) * RotateZ(Theta[1]));
 
     glUniformMatrix4fv(ModelView, 1, GL_TRUE, model_view);
+
+
     glDrawArrays(GL_TRIANGLES, 0, NumVertices);
 
     glutSwapBuffers();
@@ -256,11 +262,17 @@ void keyboard(unsigned char key, int x, int y) {
         case 'd': case 'D':
             movY += 0.1;
             break;
-        case 'o': case 'O':
-            rotate = 1;
+        case '4':
+            rotateX -= 0.5;
             break;
-        case 'p': case 'P':
-            rotate = -1;
+        case '6':
+            rotateX += 0.5;
+            break;
+        case '8':
+            rotateY += 0.5;
+            break;
+        case '2':
+            rotateY -= 0.5;
             break;
     } 
 }
