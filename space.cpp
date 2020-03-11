@@ -12,8 +12,8 @@ vec3   normals[NumVertices];
 vec3   colors[NumVertices];
 
 float groundSize = 0.3;
-
-float movX = 3;
+int pause = 0;
+float movX = 20;
 float movY = 0;
 float rotateX = 0;
 float rotateY = -0.5;
@@ -22,7 +22,7 @@ GLuint ModelView, Projection;
 int Index = 0;
 
 void quad(int a, int b, int c, int d) {
-    
+
     vec4 u;
     vec4 v;
     vec3 normal;
@@ -61,7 +61,7 @@ void quad(int a, int b, int c, int d) {
                 normals[Index] = normal; colors[Index] = vec3{ 0.8, 0.8, 0.8 }; points[Index] = verticesNew[c]; Index++;
                 normals[Index] = normal; colors[Index] = vec3{ 0.8, 0.8, 0.8 }; points[Index] = verticesNew[d]; Index++;
             }
-        }   
+        }
     }
 }
 
@@ -127,7 +127,7 @@ void init() {
 
     ground();
     tetrahedron(5);
-    
+
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -188,10 +188,17 @@ void init() {
 
 void display(void) {
 
+    if (pause) {
+
+    }
+    else {
+        movX -= 0.01;
+    }
+    
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     mat4 projection = Perspective(60.0, aspect, 0.05, 3000.0);
     glUniformMatrix4fv(Projection, 1, GL_TRUE, projection);
-    
+
 
     point4 at(rotateX, rotateY, 0.0, 3);  //ilk parametre sağ-sol, ikinci yukarı aşağı, üçüncü .. , dördüncü uzaklık.
     point4 eye(0.0, 1.0, 2.0, 2.0);
@@ -209,16 +216,32 @@ void display(void) {
 }
 
 
+void printCoords() {
+
+    std::cout << "Location of spaceship: " << movX << ", " << movY << "\n";
+}
+
 void mouse(int button, int state, int x, int y) {
 
     if (state == GLUT_DOWN) {
         switch (button) {
-        case GLUT_LEFT_BUTTON:    break;
-        case GLUT_MIDDLE_BUTTON:   break;
-        case GLUT_RIGHT_BUTTON:    break;
+        case GLUT_LEFT_BUTTON:
+            pause = 0;
+            break;
+        case GLUT_RIGHT_BUTTON: 
+            if (pause) {
+                printCoords();
+                movX -= 0.05;
+            }
+            else {
+                pause = 1;
+            }
+             
+            break;
         }
     }
 }
+
 
 void timer(int id) {
 
@@ -229,34 +252,38 @@ void timer(int id) {
 void keyboard(unsigned char key, int x, int y) {
 
     switch (key) {
-        case 033: case 'q': case 'Q':
-            exit(EXIT_SUCCESS);
-            break;
-        case 'w': case 'W':
-            movX -= 0.1;
-            break;
-        case 's': case 'S':
-            movX += 0.1;
-            break;
-        case 'a': case 'A':
-            movY -= 0.1;
-            break;
-        case 'd': case 'D':
-            movY += 0.1;
-            break;
-        case '4':
-            rotateX -= 0.5;
-            break;
-        case '6':
-            rotateX += 0.5;
-            break;
-        case '8':
-            rotateY += 0.5;
-            break;
-        case '2':
-            rotateY -= 0.5;
-            break;
-    } 
+    case 033: case 'q': case 'Q':
+        exit(EXIT_SUCCESS);
+        break;
+    case 'w': case 'W':
+        movX -= 0.1;
+        break;
+    case 's': case 'S':
+        movX += 0.1;
+        break;
+    case 'a': case 'A':
+        movY -= 0.1;
+        break;
+    case 'd': case 'D':
+        movY += 0.1;
+        break;
+    case '4':
+        rotateX -= 0.5;
+        break;
+    case '6':
+        rotateX += 0.5;
+        break;
+    case '8':
+        rotateY += 0.5;
+        break;
+    case '2':
+        rotateY -= 0.5;
+        break;
+    case 'p': case 'P':
+        if (pause) pause = 0;
+        else pause = 1;
+        break;
+    }
 }
 
 void reshape(int width, int height) {
