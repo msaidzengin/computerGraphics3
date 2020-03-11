@@ -3,6 +3,7 @@
 typedef Angel::vec4  color4;
 typedef Angel::vec4  point4;
 typedef Angel::vec4  point1;
+GLfloat aspect;
 
 const int NumVertices = 400000;
 
@@ -12,15 +13,10 @@ vec3   colors[NumVertices];
 
 float groundSize = 0.3;
 
-enum { Xaxis = 0, Yaxis = 1, Zaxis = 2, NumAxes = 3 };
-int Axis = Xaxis;
-GLfloat Theta[NumAxes] = { 0.0, 0.0, 0.0 };
-
 float movX = 3;
 float movY = 0;
 float rotateX = 0;
 float rotateY = -0.5;
-int rotate = 0;
 
 GLuint ModelView, Projection;
 int Index = 0;
@@ -127,7 +123,6 @@ void tetrahedron(int count) {
     divide_triangle(v[0], v[2], v[3], count);
 }
 
-
 void init() {
 
     ground();
@@ -194,51 +189,38 @@ void init() {
 void display(void) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    mat4 projection = Perspective(60.0, aspect, 0.05, 3000.0);
+    glUniformMatrix4fv(Projection, 1, GL_TRUE, projection);
+    
 
     point4 at(rotateX, rotateY, 0.0, 3);  //ilk parametre sağ-sol, ikinci yukarı aşağı, üçüncü .. , dördüncü uzaklık.
     point4 eye(0.0, 1.0, 2.0, 2.0);
     vec4   up(0.0, 1.0, 0.0, 1.0);
 
     const vec3 viewer_pos(movY, 1.2, movX);
-    mat4 model_view = (LookAt(eye, at, up) * Translate(-viewer_pos) * RotateX(Theta[1]) * RotateY(Theta[0]) * RotateZ(Theta[1]));
+    mat4 model_view = (LookAt(eye, at, up) * Translate(-viewer_pos) * RotateX(0) * RotateY(0) * RotateZ(0));
 
     glUniformMatrix4fv(ModelView, 1, GL_TRUE, model_view);
 
 
     glDrawArrays(GL_TRIANGLES, 0, NumVertices);
-
     glutSwapBuffers();
 
 }
+
 
 void mouse(int button, int state, int x, int y) {
 
     if (state == GLUT_DOWN) {
         switch (button) {
-        case GLUT_LEFT_BUTTON:    Axis = Xaxis;  break;
-        case GLUT_MIDDLE_BUTTON:  Axis = Yaxis;  break;
-        case GLUT_RIGHT_BUTTON:   Axis = Zaxis;  break;
+        case GLUT_LEFT_BUTTON:    break;
+        case GLUT_MIDDLE_BUTTON:   break;
+        case GLUT_RIGHT_BUTTON:    break;
         }
     }
 }
 
 void timer(int id) {
-
-    if (rotate == 1) {
-        Theta[Axis] -= 1;
-        rotate = 0;
-    }
-    else if (rotate == -1) {
-        Theta[Axis] += 1;
-        rotate = 0;
-    }
-    else {
-        Theta[Axis] += 0;
-    }
-    
-    if (Theta[Axis] > 360.0) {
-        Theta[Axis] -= 360.0;
-    }
 
     glutPostRedisplay();
     glutTimerFunc(20, timer, 0);
@@ -280,7 +262,7 @@ void keyboard(unsigned char key, int x, int y) {
 void reshape(int width, int height) {
 
     glViewport(0, 0, width, height);
-    GLfloat aspect = GLfloat(width) / height;
+    aspect = GLfloat(width) / height;
     mat4 projection = Perspective(60.0, aspect, 0.05, 3000.0);
     glUniformMatrix4fv(Projection, 1, GL_TRUE, projection);
 }
